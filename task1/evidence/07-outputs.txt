@@ -1,0 +1,62 @@
+# Шаг 7. Query data with outputs
+
+$ cat outputs.tf
+output "container_name" {
+  description = "Имя созданного контейнера"
+  value       = docker_container.nginx.name
+}
+
+output "container_id" {
+  description = "ID созданного контейнера"
+  value       = docker_container.nginx.id
+}
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container apply
+docker_image.nginx: Refreshing state... [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Refreshing state... [id=5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e]
+
+Changes to Outputs:
+  + container_id   = "5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e"
+  + container_name = "tutorial-tfvars"
+
+You can apply this plan to save these new output values to the Terraform
+state, without changing any real infrastructure.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+
+Apply complete! Resources: 0 added, 0 changed, 0 destroyed.
+
+Outputs:
+
+container_id = "5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e"
+container_name = "tutorial-tfvars"
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container output
+container_id = "5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e"
+container_name = "tutorial-tfvars"
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container output container_name
+"tutorial-tfvars"
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container output -json
+{
+  "container_id": {
+    "sensitive": false,
+    "type": "string",
+    "value": "5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e"
+  },
+  "container_name": {
+    "sensitive": false,
+    "type": "string",
+    "value": "tutorial-tfvars"
+  }
+}
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container output -raw container_id
+5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e
+$ bash scripts/tf.sh -w learn-terraform-docker-container output -raw container_id | xargs docker inspect --format '{{.Name}} {{.State.Status}}'
+/tutorial-tfvars -> running

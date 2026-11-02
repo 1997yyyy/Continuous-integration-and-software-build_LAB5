@@ -1,0 +1,50 @@
+---
+# Шаг 3 (подготовка): минимальные образы kind не содержат python3, а все модули
+# Ansible выполняются на узле на Python. Модуль raw работает без интерпретатора,
+# поэтому им и ставится python3; дальше можно пользоваться обычными модулями.
+#
+# Дополнительно: в узлах kind прописан прокси 127.0.0.1:54031, из контейнера он
+# недоступен, и apt не может скачать пакеты. Файл /etc/apt/apt.conf.d/99-noproxy
+# переводит apt в режим прямого подключения.
+- name: Подготовка узлов кластера — python3 и настройка apt
+  hosts: k8s
+  gather_facts: false
+
+  tasks:
+    - name: Проверить наличие python3 на узле
+      ansible.builtin.raw: test -x /usr/bin/python3 && echo present || echo absent
+      register: python_probe
+      changed_when: false
+
+    - name: Установить python3 (apt, переменные прокси очищены)
+      ansible.builtin.raw: >-
+        unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY;
+        apt-get update -qq && apt-get install -y -qq python3
+      when: python_probe.stdout is search('absent')
+
+    - name: Проверить версию интерпретатора
+      ansible.builtin.raw: /usr/bin/python3 --version
+      register: python_version
+      changed_when: false
+
+    - name: Показать версию python3
+      ansible.builtin.debug:
+        msg: "python3: {{ python_version.stdout | trim }} (было: {{ python_probe.stdout | trim }})"
+
+    # Дальше уже работают обычные модули (нужен python3 на узле)
+    - name: Отключить недоступный прокси для apt
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/99-noproxy
+        mode: "0644"
+        content: |
+          Acquire::http::Proxy "DIRECT";
+          Acquire::https::Proxy "DIRECT";
+
+    - name: Собрать минимальные факты (проверка работы модулей)
+      ansible.builtin.setup:
+        filter: ansible_distribution*
+      register: facts_check
+
+    - name: Показать ОС узла
+      ansible.builtin.debug:
+        msg: "{{ facts_check.ansible_facts.ansible_distribution }} {{ facts_check.ansible_facts.ansible_distribution_version }}"

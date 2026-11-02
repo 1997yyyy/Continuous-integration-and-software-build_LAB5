@@ -1,0 +1,31 @@
+# Playbook из официального руководства Ansible («Creating a playbook»)
+$ scripts/ansible.sh ansible-playbook playbooks/03-official-example.yml
+
+
+PLAY [My first play] ***********************************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [lab4-worker]
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+
+TASK [Ping my hosts] ***********************************************************
+ok: [lab4-worker]
+ok: [lab4-worker2]
+ok: [lab4-control-plane]
+
+TASK [Print message] ***********************************************************
+ok: [lab4-control-plane] => {
+    "msg": "Hello world"
+}
+ok: [lab4-worker] => {
+    "msg": "Hello world"
+}
+ok: [lab4-worker2] => {
+    "msg": "Hello world"
+}
+
+PLAY RECAP *********************************************************************
+lab4-control-plane         : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker                : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker2               : ok=3    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   

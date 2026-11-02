@@ -1,0 +1,466 @@
+# Шаг 6. Define input variables
+
+$ cat variables.tf
+variable "container_name" {
+  description = "Имя Docker-контейнера"
+  type        = string
+  default     = "tutorial"
+}
+
+variable "external_port" {
+  description = "Внешний порт, на который публикуется nginx"
+  type        = number
+  default     = 8000
+}
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container init
+Initializing the backend...
+Initializing provider plugins...
+- Reusing previous version of kreuzwerker/docker from the dependency lock file
+- Using previously-installed kreuzwerker/docker v4.2.0
+
+Terraform has been successfully initialized!
+
+# 6.1 значение по умолчанию (tutorial, порт 8000)
+$ bash scripts/tf.sh -w learn-terraform-docker-container apply
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx will be created
+  + resource "docker_container" "nginx" {
+      + attach                                      = false
+      + bridge                                      = (known after apply)
+      + command                                     = (known after apply)
+      + container_logs                              = (known after apply)
+      + container_read_refresh_timeout_milliseconds = 15000
+      + entrypoint                                  = (known after apply)
+      + env                                         = (known after apply)
+      + exit_code                                   = (known after apply)
+      + hostname                                    = (known after apply)
+      + id                                          = (known after apply)
+      + image                                       = (known after apply)
+      + init                                        = (known after apply)
+      + ipc_mode                                    = (known after apply)
+      + log_driver                                  = (known after apply)
+      + logs                                        = false
+      + memory_reservation                          = 0
+      + must_run                                    = true
+      + name                                        = "tutorial"
+      + network_data                                = (known after apply)
+      + network_mode                                = "bridge"
+      + platform                                    = (known after apply)
+      + read_only                                   = false
+      + remove_volumes                              = true
+      + restart                                     = "no"
+      + rm                                          = false
+      + runtime                                     = (known after apply)
+      + security_opts                               = (known after apply)
+      + shm_size                                    = (known after apply)
+      + start                                       = true
+      + stdin_open                                  = false
+      + stop_signal                                 = (known after apply)
+      + stop_timeout                                = (known after apply)
+      + tty                                         = false
+      + wait                                        = false
+      + wait_timeout                                = 60
+
+      + healthcheck (known after apply)
+
+      + labels (known after apply)
+
+      + ports {
+          + external = 8000
+          + internal = 80
+          + ip       = "0.0.0.0"
+          + protocol = "tcp"
+        }
+    }
+
+  # docker_image.nginx will be created
+  + resource "docker_image" "nginx" {
+      + id           = (known after apply)
+      + image_id     = (known after apply)
+      + keep_locally = false
+      + name         = "nginx:1.27-alpine"
+      + repo_digest  = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+docker_image.nginx: Creating...
+docker_image.nginx: Creation complete after 4s [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Creating...
+docker_container.nginx: Creation complete after 1s [id=ef421327967ed6511c1b2d3e522007580f955a1d040bdba845efd560be75b85b]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+$ docker ps --filter name=tutorial
+NAMES      PORTS
+tutorial   0.0.0.0:8000->80/tcp
+
+# 6.2 флаг -var
+$ bash scripts/tf.sh -w learn-terraform-docker-container apply -var container_name=tutorial-var -var external_port=8082
+docker_image.nginx: Refreshing state... [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Refreshing state... [id=ef421327967ed6511c1b2d3e522007580f955a1d040bdba845efd560be75b85b]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx must be replaced
+-/+ resource "docker_container" "nginx" {
+      + bridge                                      = (known after apply)
+      ~ command                                     = [
+          - "nginx",
+          - "-g",
+          - "daemon off;",
+        ] -> (known after apply)
+      + container_logs                              = (known after apply)
+      - cpu_shares                                  = 0 -> null
+      - dns                                         = [] -> null
+      - dns_opts                                    = [] -> null
+      - dns_search                                  = [] -> null
+      ~ entrypoint                                  = [
+          - "/docker-entrypoint.sh",
+        ] -> (known after apply)
+      ~ env                                         = [] -> (known after apply)
+      + exit_code                                   = (known after apply)
+      - group_add                                   = [] -> null
+      ~ hostname                                    = "ef421327967e" -> (known after apply)
+      ~ id                                          = "ef421327967ed6511c1b2d3e522007580f955a1d040bdba845efd560be75b85b" -> (known after apply)
+      ~ init                                        = false -> (known after apply)
+      ~ ipc_mode                                    = "private" -> (known after apply)
+      ~ log_driver                                  = "json-file" -> (known after apply)
+      - log_opts                                    = {} -> null
+      - max_retry_count                             = 0 -> null
+      - memory                                      = 0 -> null
+      - memory_swap                                 = 0 -> null
+      ~ name                                        = "tutorial" -> "tutorial-var" # forces replacement
+      ~ network_data                                = [
+          - {
+              - gateway                   = "172.17.0.1"
+              - global_ipv6_prefix_length = 0
+              - ip_address                = "172.17.0.3"
+              - ip_prefix_length          = 16
+              - mac_address               = "1a:0c:ab:3b:cb:8c"
+              - network_name              = "bridge"
+                # (2 unchanged attributes hidden)
+            },
+        ] -> (known after apply)
+      ~ platform                                    = "linux" -> (known after apply)
+      - privileged                                  = false -> null
+      - publish_all_ports                           = false -> null
+      ~ runtime                                     = "runc" -> (known after apply)
+      ~ security_opts                               = [] -> (known after apply)
+      ~ shm_size                                    = 64 -> (known after apply)
+      ~ stop_signal                                 = "SIGQUIT" -> (known after apply)
+      ~ stop_timeout                                = 0 -> (known after apply)
+      - storage_opts                                = {} -> null
+      - sysctls                                     = {} -> null
+      - tmpfs                                       = {} -> null
+      - working_dir                                 = "/" -> null
+        # (21 unchanged attributes hidden)
+
+      ~ healthcheck (known after apply)
+
+      ~ labels (known after apply)
+
+      ~ ports {
+          ~ external = 8000 -> 8082 # forces replacement
+            # (3 unchanged attributes hidden)
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+docker_container.nginx: Destroying... [id=ef421327967ed6511c1b2d3e522007580f955a1d040bdba845efd560be75b85b]
+docker_container.nginx: Destruction complete after 1s
+docker_container.nginx: Creating...
+docker_container.nginx: Creation complete after 0s [id=14a1d72a0225a5fdb2203b840e975fe7ef2f76cb9c5fadb6002887b7a206afb6]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+$ docker ps --filter name=tutorial
+NAMES          PORTS
+tutorial-var   0.0.0.0:8082->80/tcp
+
+# 6.3 переменная окружения TF_VAR_
+$ TF_VAR_container_name=tutorial-env TF_VAR_external_port=8083 bash scripts/tf.sh -w learn-terraform-docker-container apply
+docker_image.nginx: Refreshing state... [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Refreshing state... [id=14a1d72a0225a5fdb2203b840e975fe7ef2f76cb9c5fadb6002887b7a206afb6]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx must be replaced
+-/+ resource "docker_container" "nginx" {
+      + bridge                                      = (known after apply)
+      ~ command                                     = [
+          - "nginx",
+          - "-g",
+          - "daemon off;",
+        ] -> (known after apply)
+      + container_logs                              = (known after apply)
+      - cpu_shares                                  = 0 -> null
+      - dns                                         = [] -> null
+      - dns_opts                                    = [] -> null
+      - dns_search                                  = [] -> null
+      ~ entrypoint                                  = [
+          - "/docker-entrypoint.sh",
+        ] -> (known after apply)
+      ~ env                                         = [] -> (known after apply)
+      + exit_code                                   = (known after apply)
+      - group_add                                   = [] -> null
+      ~ hostname                                    = "14a1d72a0225" -> (known after apply)
+      ~ id                                          = "14a1d72a0225a5fdb2203b840e975fe7ef2f76cb9c5fadb6002887b7a206afb6" -> (known after apply)
+      ~ init                                        = false -> (known after apply)
+      ~ ipc_mode                                    = "private" -> (known after apply)
+      ~ log_driver                                  = "json-file" -> (known after apply)
+      - log_opts                                    = {} -> null
+      - max_retry_count                             = 0 -> null
+      - memory                                      = 0 -> null
+      - memory_swap                                 = 0 -> null
+      ~ name                                        = "tutorial-var" -> "tutorial-env" # forces replacement
+      ~ network_data                                = [
+          - {
+              - gateway                   = "172.17.0.1"
+              - global_ipv6_prefix_length = 0
+              - ip_address                = "172.17.0.3"
+              - ip_prefix_length          = 16
+              - mac_address               = "2a:ef:d4:96:59:57"
+              - network_name              = "bridge"
+                # (2 unchanged attributes hidden)
+            },
+        ] -> (known after apply)
+      ~ platform                                    = "linux" -> (known after apply)
+      - privileged                                  = false -> null
+      - publish_all_ports                           = false -> null
+      ~ runtime                                     = "runc" -> (known after apply)
+      ~ security_opts                               = [] -> (known after apply)
+      ~ shm_size                                    = 64 -> (known after apply)
+      ~ stop_signal                                 = "SIGQUIT" -> (known after apply)
+      ~ stop_timeout                                = 0 -> (known after apply)
+      - storage_opts                                = {} -> null
+      - sysctls                                     = {} -> null
+      - tmpfs                                       = {} -> null
+      - working_dir                                 = "/" -> null
+        # (21 unchanged attributes hidden)
+
+      ~ healthcheck (known after apply)
+
+      ~ labels (known after apply)
+
+      ~ ports {
+          ~ external = 8082 -> 8083 # forces replacement
+            # (3 unchanged attributes hidden)
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+docker_container.nginx: Destroying... [id=14a1d72a0225a5fdb2203b840e975fe7ef2f76cb9c5fadb6002887b7a206afb6]
+docker_container.nginx: Destruction complete after 0s
+docker_container.nginx: Creating...
+docker_container.nginx: Creation complete after 1s [id=d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+$ docker ps --filter name=tutorial
+NAMES          PORTS
+tutorial-env   0.0.0.0:8083->80/tcp
+
+# 6.4 файл terraform.tfvars (tutorial-tfvars, порт 8081)
+$ cat terraform.tfvars
+container_name = "tutorial-tfvars"
+external_port  = 8081
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container plan
+docker_image.nginx: Refreshing state... [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Refreshing state... [id=d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx must be replaced
+-/+ resource "docker_container" "nginx" {
+      + bridge                                      = (known after apply)
+      ~ command                                     = [
+          - "nginx",
+          - "-g",
+          - "daemon off;",
+        ] -> (known after apply)
+      + container_logs                              = (known after apply)
+      - cpu_shares                                  = 0 -> null
+      - dns                                         = [] -> null
+      - dns_opts                                    = [] -> null
+      - dns_search                                  = [] -> null
+      ~ entrypoint                                  = [
+          - "/docker-entrypoint.sh",
+        ] -> (known after apply)
+      ~ env                                         = [] -> (known after apply)
+      + exit_code                                   = (known after apply)
+      - group_add                                   = [] -> null
+      ~ hostname                                    = "d414ea59bf7a" -> (known after apply)
+      ~ id                                          = "d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c" -> (known after apply)
+      ~ init                                        = false -> (known after apply)
+      ~ ipc_mode                                    = "private" -> (known after apply)
+      ~ log_driver                                  = "json-file" -> (known after apply)
+      - log_opts                                    = {} -> null
+      - max_retry_count                             = 0 -> null
+      - memory                                      = 0 -> null
+      - memory_swap                                 = 0 -> null
+      ~ name                                        = "tutorial-env" -> "tutorial-tfvars" # forces replacement
+      ~ network_data                                = [
+          - {
+              - gateway                   = "172.17.0.1"
+              - global_ipv6_prefix_length = 0
+              - ip_address                = "172.17.0.3"
+              - ip_prefix_length          = 16
+              - mac_address               = "b2:84:2f:c7:09:37"
+              - network_name              = "bridge"
+                # (2 unchanged attributes hidden)
+            },
+        ] -> (known after apply)
+      ~ platform                                    = "linux" -> (known after apply)
+      - privileged                                  = false -> null
+      - publish_all_ports                           = false -> null
+      ~ runtime                                     = "runc" -> (known after apply)
+      ~ security_opts                               = [] -> (known after apply)
+      ~ shm_size                                    = 64 -> (known after apply)
+      ~ stop_signal                                 = "SIGQUIT" -> (known after apply)
+      ~ stop_timeout                                = 0 -> (known after apply)
+      - storage_opts                                = {} -> null
+      - sysctls                                     = {} -> null
+      - tmpfs                                       = {} -> null
+      - working_dir                                 = "/" -> null
+        # (21 unchanged attributes hidden)
+
+      ~ healthcheck (known after apply)
+
+      ~ labels (known after apply)
+
+      ~ ports {
+          ~ external = 8083 -> 8081 # forces replacement
+            # (3 unchanged attributes hidden)
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+$ bash scripts/tf.sh -w learn-terraform-docker-container apply
+docker_image.nginx: Refreshing state... [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Refreshing state... [id=d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c]
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx must be replaced
+-/+ resource "docker_container" "nginx" {
+      + bridge                                      = (known after apply)
+      ~ command                                     = [
+          - "nginx",
+          - "-g",
+          - "daemon off;",
+        ] -> (known after apply)
+      + container_logs                              = (known after apply)
+      - cpu_shares                                  = 0 -> null
+      - dns                                         = [] -> null
+      - dns_opts                                    = [] -> null
+      - dns_search                                  = [] -> null
+      ~ entrypoint                                  = [
+          - "/docker-entrypoint.sh",
+        ] -> (known after apply)
+      ~ env                                         = [] -> (known after apply)
+      + exit_code                                   = (known after apply)
+      - group_add                                   = [] -> null
+      ~ hostname                                    = "d414ea59bf7a" -> (known after apply)
+      ~ id                                          = "d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c" -> (known after apply)
+      ~ init                                        = false -> (known after apply)
+      ~ ipc_mode                                    = "private" -> (known after apply)
+      ~ log_driver                                  = "json-file" -> (known after apply)
+      - log_opts                                    = {} -> null
+      - max_retry_count                             = 0 -> null
+      - memory                                      = 0 -> null
+      - memory_swap                                 = 0 -> null
+      ~ name                                        = "tutorial-env" -> "tutorial-tfvars" # forces replacement
+      ~ network_data                                = [
+          - {
+              - gateway                   = "172.17.0.1"
+              - global_ipv6_prefix_length = 0
+              - ip_address                = "172.17.0.3"
+              - ip_prefix_length          = 16
+              - mac_address               = "b2:84:2f:c7:09:37"
+              - network_name              = "bridge"
+                # (2 unchanged attributes hidden)
+            },
+        ] -> (known after apply)
+      ~ platform                                    = "linux" -> (known after apply)
+      - privileged                                  = false -> null
+      - publish_all_ports                           = false -> null
+      ~ runtime                                     = "runc" -> (known after apply)
+      ~ security_opts                               = [] -> (known after apply)
+      ~ shm_size                                    = 64 -> (known after apply)
+      ~ stop_signal                                 = "SIGQUIT" -> (known after apply)
+      ~ stop_timeout                                = 0 -> (known after apply)
+      - storage_opts                                = {} -> null
+      - sysctls                                     = {} -> null
+      - tmpfs                                       = {} -> null
+      - working_dir                                 = "/" -> null
+        # (21 unchanged attributes hidden)
+
+      ~ healthcheck (known after apply)
+
+      ~ labels (known after apply)
+
+      ~ ports {
+          ~ external = 8083 -> 8081 # forces replacement
+            # (3 unchanged attributes hidden)
+        }
+    }
+
+Plan: 1 to add, 0 to change, 1 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+docker_container.nginx: Destroying... [id=d414ea59bf7abc9d0af98b0e4fd735a568a449c89a1fbbc045b74bf607c2092c]
+docker_container.nginx: Destruction complete after 1s
+docker_container.nginx: Creating...
+docker_container.nginx: Creation complete after 0s [id=5278a666a1d15017485df7994db14eb759e76527a4188540fa0ebea973abf78e]
+
+Apply complete! Resources: 1 added, 0 changed, 1 destroyed.
+
+$ docker ps --filter name=tutorial
+NAMES             PORTS
+tutorial-tfvars   0.0.0.0:8081->80/tcp

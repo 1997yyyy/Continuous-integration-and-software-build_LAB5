@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ inventory_hostname }}</title>
+</head>
+<body>
+  <h1>{{ inventory_hostname }}</h1>
+  <p>Узел кластера Kubernetes, настроенный Ansible.</p>
+  <ul>
+    <li>группа инвентаря: {{ group_names | join(', ') }}</li>
+    <li>ОС: {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}</li>
+    <li>ядро: {{ ansible_facts.kernel }}</li>
+    <li>python: {{ ansible_facts.python_version }}</li>
+  </ul>
+</body>
+</html>

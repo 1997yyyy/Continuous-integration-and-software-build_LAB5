@@ -1,0 +1,260 @@
+# Шаг 3. Build infrastructure
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container init
+Initializing the backend...
+Initializing provider plugins...
+- Reusing previous version of kreuzwerker/docker from the dependency lock file
+- Using previously-installed kreuzwerker/docker v4.2.0
+
+Terraform has been successfully initialized!
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container fmt
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container fmt -check
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container validate
+Success! The configuration is valid.
+
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container plan
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx will be created
+  + resource "docker_container" "nginx" {
+      + attach                                      = false
+      + bridge                                      = (known after apply)
+      + command                                     = (known after apply)
+      + container_logs                              = (known after apply)
+      + container_read_refresh_timeout_milliseconds = 15000
+      + entrypoint                                  = (known after apply)
+      + env                                         = (known after apply)
+      + exit_code                                   = (known after apply)
+      + hostname                                    = (known after apply)
+      + id                                          = (known after apply)
+      + image                                       = (known after apply)
+      + init                                        = (known after apply)
+      + ipc_mode                                    = (known after apply)
+      + log_driver                                  = (known after apply)
+      + logs                                        = false
+      + memory_reservation                          = 0
+      + must_run                                    = true
+      + name                                        = "tutorial"
+      + network_data                                = (known after apply)
+      + network_mode                                = "bridge"
+      + platform                                    = (known after apply)
+      + read_only                                   = false
+      + remove_volumes                              = true
+      + restart                                     = "no"
+      + rm                                          = false
+      + runtime                                     = (known after apply)
+      + security_opts                               = (known after apply)
+      + shm_size                                    = (known after apply)
+      + start                                       = true
+      + stdin_open                                  = false
+      + stop_signal                                 = (known after apply)
+      + stop_timeout                                = (known after apply)
+      + tty                                         = false
+      + wait                                        = false
+      + wait_timeout                                = 60
+
+      + healthcheck (known after apply)
+
+      + labels (known after apply)
+
+      + ports {
+          + external = 8000
+          + internal = 80
+          + ip       = "0.0.0.0"
+          + protocol = "tcp"
+        }
+    }
+
+  # docker_image.nginx will be created
+  + resource "docker_image" "nginx" {
+      + id           = (known after apply)
+      + image_id     = (known after apply)
+      + keep_locally = false
+      + name         = "nginx:1.27-alpine"
+      + repo_digest  = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+$ bash scripts/tf.sh -w learn-terraform-docker-container apply
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # docker_container.nginx will be created
+  + resource "docker_container" "nginx" {
+      + attach                                      = false
+      + bridge                                      = (known after apply)
+      + command                                     = (known after apply)
+      + container_logs                              = (known after apply)
+      + container_read_refresh_timeout_milliseconds = 15000
+      + entrypoint                                  = (known after apply)
+      + env                                         = (known after apply)
+      + exit_code                                   = (known after apply)
+      + hostname                                    = (known after apply)
+      + id                                          = (known after apply)
+      + image                                       = (known after apply)
+      + init                                        = (known after apply)
+      + ipc_mode                                    = (known after apply)
+      + log_driver                                  = (known after apply)
+      + logs                                        = false
+      + memory_reservation                          = 0
+      + must_run                                    = true
+      + name                                        = "tutorial"
+      + network_data                                = (known after apply)
+      + network_mode                                = "bridge"
+      + platform                                    = (known after apply)
+      + read_only                                   = false
+      + remove_volumes                              = true
+      + restart                                     = "no"
+      + rm                                          = false
+      + runtime                                     = (known after apply)
+      + security_opts                               = (known after apply)
+      + shm_size                                    = (known after apply)
+      + start                                       = true
+      + stdin_open                                  = false
+      + stop_signal                                 = (known after apply)
+      + stop_timeout                                = (known after apply)
+      + tty                                         = false
+      + wait                                        = false
+      + wait_timeout                                = 60
+
+      + healthcheck (known after apply)
+
+      + labels (known after apply)
+
+      + ports {
+          + external = 8000
+          + internal = 80
+          + ip       = "0.0.0.0"
+          + protocol = "tcp"
+        }
+    }
+
+  # docker_image.nginx will be created
+  + resource "docker_image" "nginx" {
+      + id           = (known after apply)
+      + image_id     = (known after apply)
+      + keep_locally = false
+      + name         = "nginx:1.27-alpine"
+      + repo_digest  = (known after apply)
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: 
+docker_image.nginx: Creating...
+docker_image.nginx: Creation complete after 3s [id=sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine]
+docker_container.nginx: Creating...
+docker_container.nginx: Creation complete after 1s [id=87af507bda9a2c84f26aa0a8ef621700c28497ec4d1142c2830fae4286da52d2]
+
+Apply complete! Resources: 2 added, 0 changed, 0 destroyed.
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container show
+# docker_container.nginx:
+resource "docker_container" "nginx" {
+    attach                                      = false
+    bridge                                      = null
+    command                                     = [
+        "nginx",
+        "-g",
+        "daemon off;",
+    ]
+    container_read_refresh_timeout_milliseconds = 15000
+    cpu_set                                     = null
+    cpu_shares                                  = 0
+    domainname                                  = null
+    entrypoint                                  = [
+        "/docker-entrypoint.sh",
+    ]
+    env                                         = []
+    hostname                                    = "87af507bda9a"
+    id                                          = "87af507bda9a2c84f26aa0a8ef621700c28497ec4d1142c2830fae4286da52d2"
+    image                                       = "sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10"
+    init                                        = false
+    ipc_mode                                    = "private"
+    log_driver                                  = "json-file"
+    logs                                        = false
+    max_retry_count                             = 0
+    memory                                      = 0
+    memory_reservation                          = 0
+    memory_swap                                 = 0
+    must_run                                    = true
+    name                                        = "tutorial"
+    network_data                                = [
+        {
+            gateway                   = "172.17.0.1"
+            global_ipv6_address       = null
+            global_ipv6_prefix_length = 0
+            ip_address                = "172.17.0.3"
+            ip_prefix_length          = 16
+            ipv6_gateway              = null
+            mac_address               = "d6:66:60:1e:86:42"
+            network_name              = "bridge"
+        },
+    ]
+    network_mode                                = "bridge"
+    pid_mode                                    = null
+    platform                                    = "linux"
+    privileged                                  = false
+    publish_all_ports                           = false
+    read_only                                   = false
+    remove_volumes                              = true
+    restart                                     = "no"
+    rm                                          = false
+    runtime                                     = "runc"
+    security_opts                               = []
+    shm_size                                    = 64
+    start                                       = true
+    stdin_open                                  = false
+    stop_signal                                 = "SIGQUIT"
+    stop_timeout                                = 0
+    tty                                         = false
+    user                                        = null
+    userns_mode                                 = null
+    wait                                        = false
+    wait_timeout                                = 60
+    working_dir                                 = "/"
+
+    ports {
+        external = 8000
+        internal = 80
+        ip       = "0.0.0.0"
+        protocol = "tcp"
+    }
+}
+
+# docker_image.nginx:
+resource "docker_image" "nginx" {
+    id           = "sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10nginx:1.27-alpine"
+    image_id     = "sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10"
+    keep_locally = false
+    name         = "nginx:1.27-alpine"
+    repo_digest  = "nginx@sha256:65645c7bb6a0661892a8b03b89d0743208a18dd2f3f17a54ef4b76fb8e2f2a10"
+}
+
+$ bash scripts/tf.sh -w learn-terraform-docker-container state list
+docker_container.nginx
+docker_image.nginx
+
+$ docker ps --filter name=tutorial
+NAMES      IMAGE          STATUS          PORTS
+tutorial   65645c7bb6a0   Up 15 seconds   0.0.0.0:8000->80/tcp
+
+$ curl -s http://localhost:8000/ | grep -o "<title>[^<]*</title>"
+<title>Welcome to nginx!</title>

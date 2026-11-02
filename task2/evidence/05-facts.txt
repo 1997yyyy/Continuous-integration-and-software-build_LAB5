@@ -1,0 +1,74 @@
+# Playbook 02-facts.yml
+$ scripts/ansible.sh ansible-playbook playbooks/02-facts.yml
+
+
+PLAY [Сведения об узлах кластера] **********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+ok: [lab4-worker2]
+
+TASK [Основные характеристики узла] ********************************************
+ok: [lab4-control-plane] => {
+    "msg": [
+        "узел:        lab4-control-plane",
+        "группы:      control_plane, k8s",
+        "ОС:          Debian 13.6",
+        "ядро:        6.18.54.1-microsoft-standard-WSL2",
+        "CPU:         20 vCPU",
+        "память:      7.7 ГиБ",
+        "python:      3.13.5"
+    ]
+}
+ok: [lab4-worker] => {
+    "msg": [
+        "узел:        lab4-worker",
+        "группы:      k8s, workers",
+        "ОС:          Debian 13.6",
+        "ядро:        6.18.54.1-microsoft-standard-WSL2",
+        "CPU:         20 vCPU",
+        "память:      7.7 ГиБ",
+        "python:      3.13.5"
+    ]
+}
+ok: [lab4-worker2] => {
+    "msg": [
+        "узел:        lab4-worker2",
+        "группы:      k8s, workers",
+        "ОС:          Debian 13.6",
+        "ядро:        6.18.54.1-microsoft-standard-WSL2",
+        "CPU:         20 vCPU",
+        "память:      7.7 ГиБ",
+        "python:      3.13.5"
+    ]
+}
+
+TASK [Проверить состояние пакета zsh] ******************************************
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+ok: [lab4-worker]
+
+TASK [Показать версию zsh] *****************************************************
+ok: [lab4-control-plane] => {
+    "msg": "zsh 5.9 (x86_64-debian-linux-gnu)"
+}
+ok: [lab4-worker] => {
+    "msg": "zsh 5.9 (x86_64-debian-linux-gnu)"
+}
+ok: [lab4-worker2] => {
+    "msg": "zsh 5.9 (x86_64-debian-linux-gnu)"
+}
+
+PLAY RECAP *********************************************************************
+lab4-control-plane         : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker                : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker2               : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+# Ограничение выборки: --limit lab4-worker
+$ scripts/ansible.sh ansible k8s --limit lab4-worker -m ansible.builtin.command -a uptime
+
+lab4-worker | CHANGED | rc=0 >>
+ 11:08:21 up  7:14,  0 users,  load average: 2.08, 1.31, 1.21
+

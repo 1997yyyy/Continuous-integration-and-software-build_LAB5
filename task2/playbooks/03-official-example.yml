@@ -1,0 +1,13 @@
+---
+# Пример из официальной документации Ansible
+# («Creating a playbook», раздел Using Ansible playbooks):
+# два задания — ping и вывод сообщения. Выполняется на всех узлах кластера.
+- name: My first play
+  hosts: k8s
+  tasks:
+    - name: Ping my hosts
+      ansible.builtin.ping:
+
+    - name: Print message
+      ansible.builtin.debug:
+        msg: Hello world

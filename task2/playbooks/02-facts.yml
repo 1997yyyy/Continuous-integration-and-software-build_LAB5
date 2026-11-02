@@ -1,0 +1,29 @@
+---
+# Сбор фактов об узлах кластера: показывает, что модули Ansible получают
+# сведения о системе с каждого узла (аналог ad-hoc команды
+# `ansible k8s -m ansible.builtin.setup -a "filter=ansible_distribution*"`).
+- name: Сведения об узлах кластера
+  hosts: k8s
+  gather_facts: true
+
+  tasks:
+    - name: Основные характеристики узла
+      ansible.builtin.debug:
+        msg:
+          - "узел:        {{ inventory_hostname }}"
+          - "группы:      {{ group_names | join(', ') }}"
+          - "ОС:          {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}"
+          - "ядро:        {{ ansible_facts.kernel }}"
+          - "CPU:         {{ ansible_facts.processor_vcpus }} vCPU"
+          - "память:      {{ (ansible_facts.memtotal_mb / 1024) | round(1) }} ГиБ"
+          - "python:      {{ ansible_facts.python_version }}"
+
+    - name: Проверить состояние пакета zsh
+      ansible.builtin.command: zsh --version
+      register: zsh_version
+      changed_when: false
+      failed_when: false
+
+    - name: Показать версию zsh
+      ansible.builtin.debug:
+        msg: "{{ zsh_version.stdout | default('zsh не установлен', true) }}"

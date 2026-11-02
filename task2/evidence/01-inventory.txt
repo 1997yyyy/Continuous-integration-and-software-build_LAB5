@@ -1,0 +1,25 @@
+# Версия Ansible и структура инвентаря
+$ scripts/ansible.sh ansible --version
+
+ansible [core 2.21.0]
+  config file = /work/ansible.cfg
+  configured module search path = ['/root/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+  ansible python module location = /usr/lib/python3.14/site-packages/ansible
+  ansible collection location = /root/.ansible/collections:/usr/share/ansible/collections
+  executable location = /usr/bin/ansible
+  python version = 3.14.10 (main, Oct 27 2026, 09:35:01) [GCC 15.2.0] (/usr/bin/python3)
+  jinja version = 3.1.6
+  pyyaml version = 6.0.3 (with libyaml v0.2.5)
+
+# Граф инвентаря
+$ scripts/ansible.sh ansible-inventory --graph
+
+@all:
+  |--@ungrouped:
+  |--@k8s:
+  |  |--@control_plane:
+  |  |  |--lab4-control-plane
+  |  |--@workers:
+  |  |  |--lab4-worker
+  |  |  |--lab4-worker2
+

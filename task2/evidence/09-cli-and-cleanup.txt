@@ -1,0 +1,88 @@
+# Проверка синтаксиса всех playbook
+$ scripts/ansible.sh ansible-playbook playbooks/00-bootstrap.yml --syntax-check
+
+playbook: playbooks/00-bootstrap.yml
+
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml --syntax-check
+
+playbook: playbooks/01-webserver.yml
+
+$ scripts/ansible.sh ansible-playbook playbooks/02-facts.yml --syntax-check
+
+playbook: playbooks/02-facts.yml
+
+$ scripts/ansible.sh ansible-playbook playbooks/03-official-example.yml --syntax-check
+
+playbook: playbooks/03-official-example.yml
+
+# Инструменты командной строки: какие узлы и какие задачи будут задействованы
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml --list-hosts
+
+playbook: playbooks/01-webserver.yml
+
+  play #1 (k8s): Веб-сервер на узлах кластера	TAGS: []
+    pattern: ['k8s']
+    hosts (3):
+      lab4-worker2
+      lab4-worker
+      lab4-control-plane
+
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml --list-tasks
+
+playbook: playbooks/01-webserver.yml
+
+  play #1 (k8s): Веб-сервер на узлах кластера	TAGS: []
+    tasks:
+      Установить пакет nginx	TAGS: []
+      Разложить главную страницу из шаблона Jinja2	TAGS: []
+      Запустить nginx (если ещё не запущен)	TAGS: []
+      Проверить, что страница отдаётся по HTTP	TAGS: []
+      Показать заголовок страницы	TAGS: []
+
+# Очистка стенда после демонстрации: удалить тестовые пакеты и страницу
+$ scripts/ansible.sh ansible k8s -m ansible.builtin.apt -a 'name=zsh,nginx state=absent'
+
+lab4-control-plane | SUCCESS => {
+    "changed": false
+}
+lab4-worker | SUCCESS => {
+    "changed": false
+}
+lab4-worker2 | SUCCESS => {
+    "changed": false
+}
+
+$ scripts/ansible.sh ansible k8s -m ansible.builtin.file -a 'path=/var/www/html/index.html state=absent'
+
+lab4-worker | SUCCESS => {
+    "changed": false,
+    "path": "/var/www/html/index.html",
+    "state": "absent"
+}
+lab4-control-plane | SUCCESS => {
+    "changed": false,
+    "path": "/var/www/html/index.html",
+    "state": "absent"
+}
+lab4-worker2 | SUCCESS => {
+    "changed": false,
+    "path": "/var/www/html/index.html",
+    "state": "absent"
+}
+
+# Итоговая проверка: узлы приведены в исходное состояние, стенд готов к повторению
+$ scripts/ansible.sh ansible k8s -m ansible.builtin.raw -a 'printf ...'
+
+lab4-control-plane | CHANGED | rc=0 >>
+python3=Python 3.13.5 zsh=absent nginx-bin=absent index.html=absent
+
+lab4-worker | CHANGED | rc=0 >>
+python3=Python 3.13.5 zsh=absent nginx-bin=absent index.html=absent
+
+lab4-worker2 | CHANGED | rc=0 >>
+python3=Python 3.13.5 zsh=absent nginx-bin=absent index.html=absent
+
+# Примечание: python3 остаётся установленным — это результат playbook 00-bootstrap.yml.
+# Повторный прогон scripts/demo.sh начинается именно с этого состояния: задача
+# установки python3 будет пропущена (when: ... is search('absent')), что и показывает
+# идемпотентность подготовки узлов.

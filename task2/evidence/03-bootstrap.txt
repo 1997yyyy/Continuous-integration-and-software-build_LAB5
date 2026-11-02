@@ -1,0 +1,59 @@
+# Подготовка узлов: python3 и настройка apt
+$ scripts/ansible.sh ansible-playbook playbooks/00-bootstrap.yml
+
+
+PLAY [Подготовка узлов кластера — python3 и настройка apt] *********************
+
+TASK [Проверить наличие python3 на узле] ***************************************
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+ok: [lab4-worker2]
+
+TASK [Установить python3 (apt, переменные прокси очищены)] *********************
+changed: [lab4-worker]
+changed: [lab4-control-plane]
+changed: [lab4-worker2]
+
+TASK [Проверить версию интерпретатора] *****************************************
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+ok: [lab4-worker2]
+
+TASK [Показать версию python3] *************************************************
+ok: [lab4-control-plane] => {
+    "msg": "python3: Python 3.13.5 (было: absent)"
+}
+ok: [lab4-worker] => {
+    "msg": "python3: Python 3.13.5 (было: absent)"
+}
+ok: [lab4-worker2] => {
+    "msg": "python3: Python 3.13.5 (было: absent)"
+}
+
+TASK [Отключить недоступный прокси для apt] ************************************
+changed: [lab4-worker2]
+changed: [lab4-control-plane]
+changed: [lab4-worker]
+
+TASK [Собрать минимальные факты (проверка работы модулей)] *********************
+ok: [lab4-worker2]
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+
+TASK [Показать ОС узла] ********************************************************
+ok: [lab4-control-plane] => {
+    "msg": "Debian 13.6"
+}
+ok: [lab4-worker] => {
+    "msg": "Debian 13.6"
+}
+ok: [lab4-worker2] => {
+    "msg": "Debian 13.6"
+}
+
+PLAY RECAP *********************************************************************
+lab4-control-plane         : ok=7    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker                : ok=7    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker2               : ok=7    changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+

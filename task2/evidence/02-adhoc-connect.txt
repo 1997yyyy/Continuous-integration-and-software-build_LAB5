@@ -1,0 +1,16 @@
+# Подключение к узлам кластера без Python на узле
+$ scripts/ansible.sh ansible k8s -m ansible.builtin.raw -a hostname; . /etc/os-release; echo $PRETTY_NAME
+
+lab4-control-plane | CHANGED | rc=0 >>
+lab4-control-plane
+Debian GNU/Linux 13 (trixie)
+
+lab4-worker | CHANGED | rc=0 >>
+lab4-worker
+Debian GNU/Linux 13 (trixie)
+
+lab4-worker2 | CHANGED | rc=0 >>
+lab4-worker2
+Debian GNU/Linux 13 (trixie)
+
+

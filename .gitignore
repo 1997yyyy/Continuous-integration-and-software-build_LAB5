@@ -1,0 +1,16 @@
+# состояние Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+.plugins/
+**/.plugins/
+
+# служебные файлы ОС и редакторов
+.DS_Store
+Thumbs.db
+*.swp
+
+# снимки экрана с русскими именами (в репозиторий кладутся только переименованные)
+**/Скриншот*.png
+**/屏幕截图*.png

@@ -1,0 +1,15 @@
+# Конфигурация CLI Terraform.
+# Реестр registry.terraform.io недоступен из региона, поэтому провайдер
+# kreuzwerker/docker берётся из локального зеркала в каталоге .plugins/
+# (раскладка «packed»: <host>/<namespace>/<type>/terraform-provider-<type>_<version>_<platform>.zip).
+
+provider_installation {
+  filesystem_mirror {
+    path    = "/workspace/.plugins"
+    include = ["registry.terraform.io/kreuzwerker/docker"]
+  }
+
+  direct {
+    exclude = ["registry.terraform.io/kreuzwerker/docker"]
+  }
+}

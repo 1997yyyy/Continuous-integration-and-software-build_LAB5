@@ -1,0 +1,12 @@
+# каталог состояния Terraform и локальные зеркала провайдеров
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/*.tfvars.json
+.plugins/
+.terraform.d/
+
+# crash-логи Terraform
+crash.log
+crash.*.log

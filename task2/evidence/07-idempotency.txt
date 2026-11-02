@@ -1,0 +1,48 @@
+# Повторный запуск того же playbook
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml
+
+
+PLAY [Веб-сервер на узлах кластера] ********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [lab4-worker2]
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+
+TASK [Установить пакет nginx] **************************************************
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+ok: [lab4-worker]
+
+TASK [Разложить главную страницу из шаблона Jinja2] ****************************
+ok: [lab4-worker2]
+ok: [lab4-worker]
+ok: [lab4-control-plane]
+
+TASK [Запустить nginx (если ещё не запущен)] ***********************************
+ok: [lab4-worker]
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+
+TASK [Проверить, что страница отдаётся по HTTP] ********************************
+ok: [lab4-worker]
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+
+TASK [Показать заголовок страницы] *********************************************
+ok: [lab4-control-plane] => {
+    "msg": "lab4-control-plane"
+}
+ok: [lab4-worker] => {
+    "msg": "lab4-worker"
+}
+ok: [lab4-worker2] => {
+    "msg": "lab4-worker2"
+}
+
+PLAY RECAP *********************************************************************
+lab4-control-plane         : ok=6    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker                : ok=6    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker2               : ok=6    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+

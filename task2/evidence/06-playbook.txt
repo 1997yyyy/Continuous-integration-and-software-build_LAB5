@@ -1,0 +1,84 @@
+# Проверка синтаксиса
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml --syntax-check
+
+
+playbook: playbooks/01-webserver.yml
+
+# Первый запуск
+$ scripts/ansible.sh ansible-playbook playbooks/01-webserver.yml
+
+
+PLAY [Веб-сервер на узлах кластера] ********************************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [lab4-worker2]
+ok: [lab4-control-plane]
+ok: [lab4-worker]
+
+TASK [Установить пакет nginx] **************************************************
+changed: [lab4-worker2]
+changed: [lab4-worker]
+changed: [lab4-control-plane]
+
+TASK [Разложить главную страницу из шаблона Jinja2] ****************************
+changed: [lab4-worker2]
+changed: [lab4-worker]
+changed: [lab4-control-plane]
+
+TASK [Запустить nginx (если ещё не запущен)] ***********************************
+changed: [lab4-control-plane]
+changed: [lab4-worker2]
+changed: [lab4-worker]
+
+TASK [Проверить, что страница отдаётся по HTTP] ********************************
+ok: [lab4-worker]
+ok: [lab4-control-plane]
+ok: [lab4-worker2]
+
+TASK [Показать заголовок страницы] *********************************************
+ok: [lab4-control-plane] => {
+    "msg": "lab4-control-plane"
+}
+ok: [lab4-worker] => {
+    "msg": "lab4-worker"
+}
+ok: [lab4-worker2] => {
+    "msg": "lab4-worker2"
+}
+
+RUNNING HANDLER [перезагрузить nginx] ******************************************
+changed: [lab4-worker2]
+changed: [lab4-control-plane]
+changed: [lab4-worker]
+
+PLAY RECAP *********************************************************************
+lab4-control-plane         : ok=7    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker                : ok=7    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+lab4-worker2               : ok=7    changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+# Проверка содержимого страницы на узлах
+$ scripts/ansible.sh ansible k8s -m ansible.builtin.command -a head -6 /var/www/html/index.html
+
+lab4-worker2 | CHANGED | rc=0 >>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>lab4-worker2</title>
+</head>
+lab4-worker | CHANGED | rc=0 >>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>lab4-worker</title>
+</head>
+lab4-control-plane | CHANGED | rc=0 >>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>lab4-control-plane</title>
+</head>
+

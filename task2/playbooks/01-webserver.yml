@@ -1,0 +1,52 @@
+---
+# Основной playbook задания: пример «установить пакет, разложить конфигурацию
+# по шаблону, перезапустить службу» из официального руководства по playbook
+# (Using Ansible playbooks / How To Write Ansible Playbooks), адаптированный
+# под узлы кластера kind.
+#
+# В узлах kind systemd не управляет службами (политика контейнера запрещает
+# автозапуск), поэтому nginx запускается командой, а обработчик перечитывает
+# конфигурацию через `nginx -s reload`.
+- name: Веб-сервер на узлах кластера
+  hosts: k8s
+  gather_facts: true
+  # В узлах kind прописан недоступный из контейнера прокси: очищаем переменные
+  # для всех задач (apt и проверка по HTTP ходят напрямую)
+  environment: "{{ clear_proxy }}"
+
+  tasks:
+    - name: Установить пакет nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Разложить главную страницу из шаблона Jinja2
+      ansible.builtin.template:
+        src: ../templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: root
+        group: root
+        mode: "0644"
+      notify: перезагрузить nginx
+
+    - name: Запустить nginx (если ещё не запущен)
+      ansible.builtin.command: nginx
+      args:
+        creates: /run/nginx.pid
+
+    - name: Проверить, что страница отдаётся по HTTP
+      ansible.builtin.uri:
+        url: http://127.0.0.1/
+        return_content: true
+        status_code: 200
+      register: page
+
+    - name: Показать заголовок страницы
+      ansible.builtin.debug:
+        msg: "{{ page.content | regex_search('<title>(.*?)</title>', '\\1') | first }}"
+
+  handlers:
+    - name: перезагрузить nginx
+      ansible.builtin.command: nginx -s reload
